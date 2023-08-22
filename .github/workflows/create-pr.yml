@@ -45,6 +45,7 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pr.outputs.pr_number }}" \
             | jq '.node_id')
+          echo "PR_ID: $PR_ID"
           curl \
             -X POST \
             -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -52,7 +53,7 @@ jobs:
             -d '{
               "query": "mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id }) { clientMutationId } }",
               "variables": {
-                "id": "'"$PR_ID"'"
+                "id": "$PR_ID"
               }
             }' \
             "https://api.github.com/graphql"
