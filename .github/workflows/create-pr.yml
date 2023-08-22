@@ -31,3 +31,14 @@ jobs:
           route: POST /repos/${{ github.repository }}/issues/${{ steps.create_pr.outputs.pr_number }}/assignees
           assignees: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+  auto-merge:
+    needs: action-pull-request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automerge PR
+        uses: pascalgn/automerge-action@v0.14.2
+        with:
+          GITHUB_TOKEN: "${{ secrets.GH_TOKEN }}"
