@@ -1,4 +1,4 @@
-name: Create and Enable Auto Merge on Push
+name: Create PR
 
 on:
   push:
@@ -23,8 +23,8 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
           destination_branch: "main"
           source_branch: ""
-          pr_title: "PR from ${{ steps.branch_name.outputs.branch }}"
-          pr_body: "This is an auto-generated PR."
+          pr_title: "${{ steps.branch_name.outputs.branch }}"
+          pr_body: "This is an auto-create PR."
           draft: false
 
 
@@ -36,11 +36,25 @@ jobs:
           assignees: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Enable Auto Merge for PR
         if: steps.create_pr.outputs.pr_number
         run: |
-          curl \
-            -X PUT \
+          PR_ID=$(curl \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pr.outputs.pr_number }}/auto_merge"
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pr.outputs.pr_number }}" \
+            | jq '.node_id')
+          curl \
+            -X POST \
+            -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id }) { clientMutationId } }",
+              "variables": {
+                "id": "'"$PR_ID"'"
+              }
+            }' \
+            "https://api.github.com/graphql"
+        env:
+          PR_ID: ${{ steps.create_pr.outputs.pr_number }}
