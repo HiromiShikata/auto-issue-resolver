@@ -40,22 +40,18 @@ jobs:
       - name: Enable Auto Merge for PR
         if: steps.create_pr.outputs.pr_number
         run: |
-          PR_ID=$(curl \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pr.outputs.pr_number }}" \
-            | jq '.node_id')
-          echo "PR_ID: $PR_ID"
-          curl \
-            -X POST \
+          RESPONSE=$(curl -s -X POST \
             -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
               "query": "mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id }) { clientMutationId } }",
               "variables": {
-                "id": "$PR_ID"
+                "id": "'"${{ steps.get_pr_id.outputs.node_id }}"'"
               }
             }' \
-            "https://api.github.com/graphql"
-        env:
-          PR_ID: ${{ steps.create_pr.outputs.pr_number }}
+            "https://api.github.com/graphql")
+          echo "$RESPONSE"
+          if echo "$RESPONSE" | jq -e '.errors' >/dev/null; then
+            echo "Failed to enable auto merge"
+            exit 1
+          fi
