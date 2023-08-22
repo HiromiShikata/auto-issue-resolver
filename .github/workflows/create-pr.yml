@@ -1,28 +1,32 @@
-name: Create PR
+name: Create and Enable Auto Merge on Push
+
 on:
   push:
-    branches-ignore: main
+    branches-ignore:
+      - main
+
 jobs:
-  action-pull-request:
+  create_and_enable_automerge:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v2
 
       - name: Set branch name as output
         id: branch_name
         run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
 
       - name: Create Pull Request
+        id: create_pr
         uses: repo-sync/pull-request@v2
         with:
-          github_token: ${{ secrets.GH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           destination_branch: "main"
           source_branch: ""
-          pr_title: "${{ steps.branch_name.outputs.branch }}"
+          pr_title: "PR from ${{ steps.branch_name.outputs.branch }}"
           pr_body: "This is an auto-generated PR."
           draft: false
+
 
       - name: Assign PR to author
         if: steps.create_pr.outputs.pr_number
@@ -31,7 +35,6 @@ jobs:
           route: POST /repos/${{ github.repository }}/issues/${{ steps.create_pr.outputs.pr_number }}/assignees
           assignees: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Enable Auto Merge for PR
         if: steps.create_pr.outputs.pr_number
