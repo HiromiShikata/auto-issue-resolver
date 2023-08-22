@@ -40,5 +40,5 @@ jobs:
     steps:
       - name: Automerge PR
         uses: pascalgn/automerge-action@v0.14.2
-        with:
+        env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
