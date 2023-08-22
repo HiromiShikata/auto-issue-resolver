@@ -33,11 +33,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
 
-  auto-merge:
-    needs: action-pull-request
-    runs-on: ubuntu-latest
-    steps:
-      - name: Automerge PR
-        uses: pascalgn/automerge-action@v0.14.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Enable Auto Merge for PR
+        if: steps.create_pr.outputs.pr_number
+        run: |
+          curl \
+            -X PUT \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.create_pr.outputs.pr_number }}/auto_merge"
