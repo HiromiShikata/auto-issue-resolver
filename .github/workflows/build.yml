@@ -19,7 +19,7 @@ jobs:
 
       - name: Check code format
         run: |
-          npm run format
+          npm run fmt
           git --no-pager diff
           exit $(git diff | wc -l)
 
