@@ -33,7 +33,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
 
-
   auto-merge:
     needs: action-pull-request
     runs-on: ubuntu-latest
