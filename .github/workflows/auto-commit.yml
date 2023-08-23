@@ -1,4 +1,4 @@
-name: 'Format'
+name: Auto commit / format
 
 on: push
 
