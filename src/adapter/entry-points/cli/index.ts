@@ -7,45 +7,68 @@ import { OpenAiIssueResolver } from '../../repositories/OpenAi/OpenAiIssueResolv
 import { ChildProcessBashExecutor } from '../../repositories/ChildProcessBashExecutor';
 import { ResolveIssueUseCase } from '../../../domain/usecases/ResolveIssueUseCase';
 import { config } from 'dotenv';
+import { MonitorIssueUseCase } from '../../../domain/usecases/MonitorIssueUseCase';
+import { SystemDateRepository } from '../../repositories/SystemDateRepository';
 config();
 
 const GITHUB_TOKEN = process.env.GH_TOKEN ?? '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? '';
-
-const createUseCase = () => {
-  const octokit = new Octokit({
-    auth: GITHUB_TOKEN,
-    userAgent: 'OpenAI GitHub bot',
-  });
-  const issueRepository = new OctokitIssueRepository(octokit);
-  const openai: OpenAI = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-  });
-  const issueResolver = new OpenAiIssueResolver(openai);
-  const bashExecutor = new ChildProcessBashExecutor();
-  return new ResolveIssueUseCase(issueResolver, issueRepository, bashExecutor);
-};
+const octokit = new Octokit({
+  auth: GITHUB_TOKEN,
+  userAgent: 'OpenAI GitHub bot',
+});
+const issueRepository = new OctokitIssueRepository(octokit);
+const openai: OpenAI = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+});
+const issueResolver = new OpenAiIssueResolver(openai);
+const bashExecutor = new ChildProcessBashExecutor();
+const dateRepository = new SystemDateRepository();
+const resolveIssueUseCase = new ResolveIssueUseCase(
+  issueResolver,
+  issueRepository,
+  bashExecutor,
+);
+const monitorIssueUseCase = new MonitorIssueUseCase(
+  issueRepository,
+  dateRepository,
+  resolveIssueUseCase,
+);
 
 const program = new Command();
 program
-  .argument('<botUserName>', 'bot user name of github')
-  .argument('<issueId>', 'owner/repo#issue_number')
-  .option('-t, --try-count <tryCount>', 'try count', parseInt)
   .name('Auto Issue Resolver')
+  .argument('<botUserName>', 'bot user name of github')
+  .option('-t, --try-count <tryCount>', 'try count', parseInt)
+  .option(
+    '-m, --monitor-hours <monitorHours>',
+    'The number of hours the system will continuously monitor or observe for changes or updates.',
+    parseInt,
+  )
+  .option('-i, --issue-id <issueId>', 'owner/repo#issue_number')
   .description(``)
   .action(
     async (
       botUserName: string,
-      issueId: string,
       {
         tryCount,
+        issueId,
+        monitorHours,
       }: {
-        tryCount: number;
+        tryCount: number | undefined;
+        issueId: string | undefined;
+        monitorHours: number | undefined;
       },
     ) => {
-      const useCase = createUseCase();
-      const res = await useCase.run(botUserName, issueId, tryCount ?? 10);
-      console.log(JSON.stringify(res));
+      if (issueId) {
+        await resolveIssueUseCase.run(botUserName, issueId, tryCount ?? 10);
+      } else {
+        await monitorIssueUseCase.run(
+          botUserName,
+          tryCount ?? 10,
+          monitorHours ?? 1,
+        );
+      }
     },
   );
 if (process.argv) {
