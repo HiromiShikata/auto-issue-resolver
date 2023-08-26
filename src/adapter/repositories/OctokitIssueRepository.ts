@@ -1,11 +1,17 @@
-import { IssueRepository } from '../../domain/usecases/adapter-interfaces/IssueRepository';
+import {
+  IssueRepository,
+  IssueWithoutInformationForResolver,
+} from '../../domain/usecases/adapter-interfaces/IssueRepository';
 import { Issue } from '../../domain/entities/Issue';
 import { Octokit } from '@octokit/rest';
+import { User } from '../../domain/entities/User';
 
 export class OctokitIssueRepository implements IssueRepository {
   constructor(private readonly octokit: Octokit) {}
 
-  getIssue = async (issueId: Issue['id']): Promise<Issue | null> => {
+  getIssue = async (
+    issueId: Issue['id'],
+  ): Promise<IssueWithoutInformationForResolver | null> => {
     const issue = await this.octokit.issues.get(this.extractIssueId(issueId));
 
     const commentsResponse = await this.octokit.issues.listComments(
@@ -65,5 +71,58 @@ export class OctokitIssueRepository implements IssueRepository {
       repo,
       issue_number: Number(issueNumber),
     };
+  };
+
+  getIssueIdsByAssignee = async (
+    assignee: User['githubUserId'],
+  ): Promise<Issue['id'][]> => {
+    type GraphQLIssueNode = {
+      id: string;
+      repository: {
+        owner: {
+          login: string;
+        };
+        name: string;
+      };
+      number: number;
+    };
+
+    type GraphQLSearch = {
+      edges: {
+        node: GraphQLIssueNode;
+      }[];
+    };
+
+    const query = `
+      query($searchQuery: String!) {
+        search(query: $searchQuery, type: ISSUE, first: 100) {
+          edges {
+            node {
+              ... on Issue {
+                id
+                repository {
+                  owner {
+                    login
+                  }
+                  name
+                }
+                number
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const searchQuery = `is:issue assignee:${assignee} is:open`;
+    const response = await this.octokit.graphql<{ search: GraphQLSearch }>(
+      query,
+      { searchQuery },
+    );
+    const edges = response.search.edges;
+
+    return edges.map((edge) => {
+      return `${edge.node.repository.owner.login}/${edge.node.repository.name}#${edge.node.number}`;
+    });
   };
 }
