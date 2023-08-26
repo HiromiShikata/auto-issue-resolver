@@ -20,25 +20,13 @@ ${
 ${bashResult.stdout}
   </pre>
 </details>
-`
-    : ''
-}
 
-### stderr
-\`\`\`
-${
-  bashResult.stderr && bashResult.stderr?.length > 300
-    ? bashResult.stderr.slice(0, 300) + '...'
-    : bashResult.stderr ?? ''
-}
-\`\`\`
-${
-  bashResult.stderr && bashResult.stderr?.length > 300
-    ? `
 <details>
-  <summary>See all</summary>
+  <summary>Information for resolver</summary>
   <pre>
-${bashResult.stderr}
+\`\`\`
+${bashResult.stdout}
+\`\`\`
   </pre>
 </details>
 `
