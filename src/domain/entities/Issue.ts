@@ -9,5 +9,6 @@ export type Issue = {
   comments: {
     userName: string;
     content: string;
+    informationForResolver: string | null;
   }[];
 };
