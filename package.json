@@ -54,7 +54,7 @@
     "jest-html-reporter": "^3.10.2",
     "jest-junit": "^16.0.0",
     "prettier": "^3.0.2",
-    "semantic-release": "^21.0.9",
+    "semantic-release": "^22.0.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.1.6"
   },
