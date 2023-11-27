@@ -1,15 +1,15 @@
 import { execSync } from 'child_process';
 
 describe('commander program', () => {
-  // describe('monitor', () => {
-  //   it('should success', () => {
-  //     const output = execSync(
-  //       'npx ts-node ./src/adapter/entry-points/cli/index.ts bot-test-hiromishikata -t 10 -m 1',
-  //     ).toString();
-  //
-  //     expect(output.trim()).toEqual(JSON.stringify({}));
-  //   });
-  // });
+  describe('monitor', () => {
+    it('should success', () => {
+      const output = execSync(
+        'npx ts-node ./src/adapter/entry-points/cli/index.ts bot-test-hiromishikata -t 10 -m 1',
+      ).toString();
+
+      expect(output.trim()).toEqual(JSON.stringify({}));
+    });
+  });
   // describe('resolve', () => {
   //   it('should success', () => {
   //     const output = execSync(

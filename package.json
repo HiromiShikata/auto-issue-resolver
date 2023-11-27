@@ -12,7 +12,9 @@
     "lint-fix": "eslint src --fix",
     "fmt": "npm run prettier && npm run lint-fix",
     "build": "tsc -p ./tsconfig.build.json",
-    "test": "jest"
+    "issue-describer": "ts-node ./src/issue-describer/index.ts",
+    "test": "ts-node ./src/all-issue-exporter/index.ts",
+    "testa": "jest"
   },
   "repository": {
     "type": "git",
