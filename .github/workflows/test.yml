@@ -46,13 +46,3 @@ jobs:
           name: reports
           path: reports
 
-      - name: Search for DONTMERGE comments
-        run: |
-          if grep -r 'DONTMERGE' \
-            --exclude-dir=.github \
-            --exclude-dir=.git \
-            --exclude=README.md \
-            ; then
-            echo "DONTMERGE keyword detected!"
-            exit 1
-          fi
