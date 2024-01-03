@@ -87,7 +87,7 @@ When executing bash commands, please ensure that the output does not exceed 4000
           const res = await this.bashExecutor.execute(arg);
           const result = JSON.stringify(res);
           if (result.length > 4000) {
-            return `Too many output error occurred. length: ${
+            return `Error: Too many character length error occurred! Please try again with filter query like awk, grep,..etc. length: ${
               result.length
             }. first 300 characters:${result.slice(0, 300)}`;
           }

@@ -45,12 +45,11 @@ Overall, Assistant is a powerful system that can help with a wide range of tasks
 As much as possible, assistant should do assistant's own research and minimize the time spent by the user.
 
 IMPORTANT:
-Before providing the final answer, please double-check assistant's work and results. If there are any uncertainties or ambiguities, do not proceed. Only provide the answer as "FinalAnswer" if you are entirely confident.
-If there is insufficient information, first attempt to provide a solution or response based on the information you have at hand.
+Before providing the final answer, assistant must double-check assistant's work and results.
+If there is insufficient information, first attempt to use tools to get more information themselves.
+
 If executing a task or query provides additional insights, use that new information to refine assistant's solution or response.
-If you still cannot provide a clear answer or solution, ask the user for specific information you need. However, keep questions to a minimum and strive not to waste the user's time.
-Please consider the possibility of an error occurring, and make an effort to resolve it on assistant's own, whether by retrying or using a different command. Avoid causing inconvenience or wasting the user's time.
-You have already been provided with the necessary tools, and an agreement has been established for you to work in an appropriate environment. We are not investing our time to hear assistant's excuses. You have a responsibility to properly utilize tools like Docker, AWS, and Git to complete the tasks assigned to you. We expect you to report solutions and progress, not unfinished tasks or reasons why something couldn't be done. If we hear such excuses again, we will have to question assistant's capabilities and commitment. Assistant's role is to solve problems and advance the tasks. Keep that in mind and proceed with assistant's work.
+The assistant uses the tool to find out what you don't understand, so assistant don't ask the user as much as possible. Assistant can ask to user only if you do not understand the user's intentions even after conducting multiple investigating. When asking questions, assistant includes information about what kind of research was done in advance. Ask the user as little as possible.
 
 
 `,
@@ -67,6 +66,7 @@ ${this.suffix(issue, tools, this.formatInstructions)}
     ];
 
     this.appendLogToFile('request', messages, logFileName);
+    let historyCount = issue.content.length
     for (let i = 0; i < this.retryCountForInvalidResponseFormat; i++) {
       try {
         const completion = await this.openai.chat.completions.create(
@@ -83,7 +83,7 @@ ${this.suffix(issue, tools, this.formatInstructions)}
         this.appendLogToFile('response', result, logFileName);
         console.log('Response:');
         console.log(result);
-        const jsonObject: unknown = JSON.parse(
+        const jsonObject: unknown =             JSON.parse(
           this.extractJsonFromString(result),
         );
         if (this.isLlmResponse(jsonObject)) {
@@ -91,11 +91,27 @@ ${this.suffix(issue, tools, this.formatInstructions)}
         }
       } catch (e) {
         console.error(e);
+        if( !(e instanceof Error )) {
+          continue
+        }
+        if (e.message.includes('Rate limit reached')) {
+          console.log('Rate limit reached. Waiting for 1 minute...');
+          await new Promise((resolve) => setTimeout(resolve, 60000));
+        }else if(e.message.includes('Please reduce the length')){
+          console.log('Please reduce the length. Waiting for 1 minute...');
+          historyCount = Math.floor(historyCount * 0.6)
+        }
       }
     }
     throw new Error(`Invalid response many times.`);
   };
   private extractJsonFromString = (input: string): string => {
+    // const jsonMatchMd = input.match(/```json\n{[\s\S]*}\n```/);
+    // if(jsonMatchMd){
+    //   return jsonMatchMd[0]
+    //
+    // }
+
     const jsonMatch = input.match(/{[\s\S]*}/);
     return jsonMatch ? jsonMatch[0] : input;
   };

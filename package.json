@@ -60,8 +60,12 @@
   },
   "dependencies": {
     "@octokit/rest": "^20.0.1",
+    "axios": "^1.5.0",
     "commander": "^11.0.0",
     "dotenv": "^16.3.1",
-    "openai": "^4.1.0"
+    "node-html-parser": "^6.1.6",
+    "openai": "^4.1.0",
+    "pdf-parse": "^1.1.1",
+    "weaviate-ts-client": "^1.5.0"
   }
 }
