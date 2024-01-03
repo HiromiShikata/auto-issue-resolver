@@ -22,5 +22,4 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'text2vec-openai'
       ENABLE_MODULES: 'text2vec-openai'
       CLUSTER_HOSTNAME: 'node1'
-      TEXT2VEC_OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY'  # ここにOpenAIのAPIキーを追加してください
-...
+      TEXT2VEC_OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY' # ここにOpenAIのAPIキーを追加してください
