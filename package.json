@@ -38,7 +38,7 @@
   "homepage": "https://github.com/HiromiShikata/auto-issue-resolver#readme",
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^10.0.1",
+    "@semantic-release/commit-analyzer": "^11.0.0",
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.5.4",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
@@ -54,7 +54,7 @@
     "jest-html-reporter": "^3.10.2",
     "jest-junit": "^16.0.0",
     "prettier": "^3.0.2",
-    "semantic-release": "^22.0.0",
+    "semantic-release": "^23.0.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.1.6"
   },
